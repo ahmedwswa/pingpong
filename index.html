@@ -5,23 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ping Pong Game</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #1a2a6c, #b21f1f, #fdbb2d);
+            overflow: hidden;
+        }
         canvas {
             background: black;
             display: block;
-            margin: auto;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         
-        let paddleHeight = 80, paddleWidth = 10;
-        let leftPaddle = { x: 10, y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
-        let rightPaddle = { x: canvas.width - 20, y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
-        let ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: 4, radius: 8 };
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let paddleHeight = 100, paddleWidth = 15;
+        let leftPaddle = { x: 20, y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
+        let rightPaddle = { x: canvas.width - 35, y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
+        let ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 6, dy: 6, radius: 10 };
+        
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.dx = Math.random() > 0.5 ? 6 : -6;
+            ball.dy = Math.random() > 0.5 ? 6 : -6;
+        }
         
         function drawRect(x, y, w, h, color) {
             ctx.fillStyle = color;
@@ -41,17 +63,21 @@
             leftPaddle.y += leftPaddle.dy;
             rightPaddle.y += rightPaddle.dy;
             
-            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+            if (ball.y - ball.radius <= 0 || ball.y + ball.radius >= canvas.height) {
                 ball.dy *= -1;
             }
             
             if (
-                (ball.x - ball.radius < leftPaddle.x + paddleWidth && 
-                 ball.y > leftPaddle.y && ball.y < leftPaddle.y + paddleHeight) ||
-                (ball.x + ball.radius > rightPaddle.x && 
-                 ball.y > rightPaddle.y && ball.y < rightPaddle.y + paddleHeight)
+                (ball.x - ball.radius <= leftPaddle.x + paddleWidth && 
+                 ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight) ||
+                (ball.x + ball.radius >= rightPaddle.x && 
+                 ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight)
             ) {
                 ball.dx *= -1;
+            }
+            
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                resetBall();
             }
         }
         
@@ -69,15 +95,23 @@
         }
         
         document.addEventListener("keydown", (e) => {
-            if (e.key === "w") leftPaddle.dy = -5;
-            if (e.key === "s") leftPaddle.dy = 5;
-            if (e.key === "ArrowUp") rightPaddle.dy = -5;
-            if (e.key === "ArrowDown") rightPaddle.dy = 5;
+            if (e.key === "w") leftPaddle.dy = -8;
+            if (e.key === "s") leftPaddle.dy = 8;
+            if (e.key === "ArrowUp") rightPaddle.dy = -8;
+            if (e.key === "ArrowDown") rightPaddle.dy = 8;
         });
         
         document.addEventListener("keyup", (e) => {
             if (e.key === "w" || e.key === "s") leftPaddle.dy = 0;
             if (e.key === "ArrowUp" || e.key === "ArrowDown") rightPaddle.dy = 0;
+        });
+        
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            leftPaddle.y = canvas.height / 2 - paddleHeight / 2;
+            rightPaddle.y = canvas.height / 2 - paddleHeight / 2;
+            resetBall();
         });
         
         gameLoop();
