@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong Game</title>
+    <style>
+        canvas {
+            background: black;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        let paddleHeight = 80, paddleWidth = 10;
+        let leftPaddle = { x: 10, y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
+        let rightPaddle = { x: canvas.width - 20, y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
+        let ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: 4, radius: 8 };
+        
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, w, h);
+        }
+        
+        function drawBall(x, y, radius, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function update() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+            leftPaddle.y += leftPaddle.dy;
+            rightPaddle.y += rightPaddle.dy;
+            
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                ball.dy *= -1;
+            }
+            
+            if (
+                (ball.x - ball.radius < leftPaddle.x + paddleWidth && 
+                 ball.y > leftPaddle.y && ball.y < leftPaddle.y + paddleHeight) ||
+                (ball.x + ball.radius > rightPaddle.x && 
+                 ball.y > rightPaddle.y && ball.y < rightPaddle.y + paddleHeight)
+            ) {
+                ball.dx *= -1;
+            }
+        }
+        
+        function draw() {
+            drawRect(0, 0, canvas.width, canvas.height, "black");
+            drawRect(leftPaddle.x, leftPaddle.y, paddleWidth, paddleHeight, "white");
+            drawRect(rightPaddle.x, rightPaddle.y, paddleWidth, paddleHeight, "white");
+            drawBall(ball.x, ball.y, ball.radius, "white");
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "w") leftPaddle.dy = -5;
+            if (e.key === "s") leftPaddle.dy = 5;
+            if (e.key === "ArrowUp") rightPaddle.dy = -5;
+            if (e.key === "ArrowDown") rightPaddle.dy = 5;
+        });
+        
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "w" || e.key === "s") leftPaddle.dy = 0;
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") rightPaddle.dy = 0;
+        });
+        
+        gameLoop();
+    </script>
+</body>
+</html>
